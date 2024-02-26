@@ -16,7 +16,7 @@
 	<div class="flex w-full flex-col items-center">
 		<div>{$t('home.title')}</div>
 		<H1>Rate My Internship 🎉</H1>
-		<Small className="mt-3">Søk på hundrevis av bedrifter og sommerjobber</Small>
+		<Small className="mt-3">{$t('home.description')}</Small>
 		<Input placeholder="Bekk..." class="mt-6 w-[80%]" on:change={(e) => handleChange(e)}></Input>
 	</div>
 	<div class="grid-cols-3 gap-4 xl:grid">

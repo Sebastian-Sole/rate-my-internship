@@ -1,4 +1,8 @@
 {
     "language_select": "Velg Språk",
-    "language_name": "Norsk"
+    "language_name": "Norsk",
+    "navbar": {
+        "login": "Logg inn",
+        "sign_up": "Registrer"
+    }
 }

@@ -16,7 +16,9 @@
 </script>
 
 <div class="mt-5 flex w-full flex-row justify-end">
-	<div>
+	<Button class="mr-3">{$t('common.navbar.login')}</Button>
+	<Button class="mr-3 bg-secondary">{$t('common.navbar.sign_up')}</Button>
+	<div class="mr-5">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger asChild let:builder>
 				<Button variant="outline" builders={[builder]}><Globe /></Button>
@@ -32,6 +34,4 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</div>
-	<Button class="mr-3">Login</Button>
-	<Button class="mr-3 bg-secondary">Sign Up</Button>
 </div>

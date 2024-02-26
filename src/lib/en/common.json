@@ -1,4 +1,8 @@
 {
     "language_select": "Select Language",
-    "language_name": "English"
+    "language_name": "English",
+    "navbar": {
+        "login": "Login",
+        "sign_up": "Sign Up"
+    }
 }
