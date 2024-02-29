@@ -1,3 +1,4 @@
+import { supabase } from '$lib/supabaseClient';
 import { loadTranslations } from '$lib/translations';
 
 export const load = async ({ url }) => {
@@ -7,5 +8,7 @@ export const load = async ({ url }) => {
 
 	await loadTranslations(initLocale, pathname); // keep this just before the `return`
 
-	return {};
+	const { data, error } = await supabase.auth.getSession();
+
+	return { data, error };
 };

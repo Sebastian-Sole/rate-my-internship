@@ -1,0 +1,84 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["multiSchema"]
+}
+
+model User {
+    id          Int          @id @default(autoincrement())
+    username    String       @unique
+    name        String
+    email       String       @unique
+    internships Internship[]
+    createdAt   DateTime     @default(now())
+}
+
+model Company {
+    id          Int          @id @default(autoincrement())
+    name        String
+    description String?
+    websiteUrl  String?
+    logo        String? // This can be a URL or a path to the file
+    internships Internship[]
+    createdAt   DateTime     @default(now())
+}
+
+model Internship {
+    id                     Int                    @id @default(autoincrement())
+    name                   String
+    rating                 Float
+    comment                String
+    isAnonymous            Boolean
+    start_date             DateTime
+    end_date               DateTime
+    hourlyWage             Float
+    teamSize               Int
+    projectDescription     String
+    learnings              String
+    mentoringValue         String
+    socialAspects          String
+    expectationsVsReality  String
+    user                   User                   @relation(fields: [userId], references: [id])
+    userId                 Int
+    company                Company                @relation(fields: [companyId], references: [id])
+    companyId              Int
+    createdAt              DateTime               @default(now())
+    InternshipTechnologies InternshipTechnology[]
+    JobType                JobType[]
+}
+
+model Technology {
+    id                     Int                    @id @default(autoincrement())
+    name                   String
+    InternshipTechnologies InternshipTechnology[]
+    JobTypeTechnologies    JobTypeTechnology[]
+}
+
+model JobType {
+    id                  Int                 @id @default(autoincrement())
+    type                String              @unique
+    internships         Internship[]
+    JobTypeTechnologies JobTypeTechnology[]
+}
+
+model InternshipTechnology {
+    internship   Internship @relation(fields: [internshipId], references: [id])
+    internshipId Int
+    technology   Technology @relation(fields: [technologyId], references: [id])
+    technologyId Int
+
+    @@id([internshipId, technologyId])
+}
+
+model JobTypeTechnology {
+    jobType      JobType    @relation(fields: [jobTypeId], references: [id])
+    jobTypeId    Int
+    technology   Technology @relation(fields: [technologyId], references: [id])
+    technologyId Int
+
+    @@id([jobTypeId, technologyId])
+}
