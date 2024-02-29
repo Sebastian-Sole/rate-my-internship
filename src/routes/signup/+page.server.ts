@@ -1,19 +1,19 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { AuthSchema } from '$lib/schemas/SignupSchema';
+import { SignupSchema } from '$lib/schemas/SignupSchema';
 import type { Actions } from './$types.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { supabase } from '$lib/supabaseClient.js';
 
 export async function load({ params }) {
 	return {
-		form: await superValidate(zod(AuthSchema))
+		form: await superValidate(zod(SignupSchema))
 	};
 }
 
 export const actions: Actions = {
 	default: async (event) => {
-		const form = await superValidate(event, zod(AuthSchema));
+		const form = await superValidate(event, zod(SignupSchema));
 		if (!form.valid) {
 			console.log(form.errors);
 			return fail(400, {
