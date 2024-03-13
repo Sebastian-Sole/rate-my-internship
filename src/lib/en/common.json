@@ -3,6 +3,7 @@
     "language_name": "English",
     "navbar": {
         "login": "Login",
-        "sign_up": "Sign Up"
+        "sign_up": "Sign Up",
+        "logout": "Logout"
     }
 }

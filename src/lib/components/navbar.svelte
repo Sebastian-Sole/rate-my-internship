@@ -5,34 +5,30 @@
 	let language = '$locale';
 
 	import { t, locales, locale } from '$lib/translations';
-	import type { AuthError, Session } from '@supabase/supabase-js';
+	import type { Session } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
 
-	export let authData: {
-		data: { session: Session } | { session: null } | { session: null };
-		error: AuthError | null;
-	};
+	export let session: Session | null;
 
 	$: {
-		// watch for changes to the language variable
 		if (language !== $locale) {
-			// if the language has changed, update the current locale
 			$locale = language;
 		}
 	}
 </script>
 
 <div class="mt-5 flex w-full flex-row justify-end">
-	{#if authData.data.session}
+	{#if session}
 		<Button class="mr-3" on:click={() => console.log('logout')}>{$t('common.navbar.logout')}</Button
 		>
 	{/if}
-	{#if !authData.data.session}
+	{#if !session}
 		<Button class="mr-3" on:click={() => goto('/login')}>{$t('common.navbar.login')}</Button>
 		<Button class="mr-3 bg-secondary" on:click={() => goto('/signup')}
 			>{$t('common.navbar.sign_up')}</Button
 		>
 	{/if}
+
 	<div class="mr-5">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger asChild let:builder>

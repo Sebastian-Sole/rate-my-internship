@@ -3,6 +3,7 @@
     "language_name": "Norsk",
     "navbar": {
         "login": "Logg inn",
-        "sign_up": "Registrer"
+        "sign_up": "Registrer",
+        "logout": "Logg ut"
     }
 }

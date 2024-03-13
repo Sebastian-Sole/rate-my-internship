@@ -4,7 +4,6 @@
 	import H1 from '$lib/components/ui/typography/h1.svelte';
 	import Small from '$lib/components/ui/typography/small.svelte';
 	import { t } from '$lib/translations';
-	import type { PageData } from './$types';
 
 	let inputValue: string = '';
 
