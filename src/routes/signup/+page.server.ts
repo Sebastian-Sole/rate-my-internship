@@ -3,7 +3,6 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { AuthSchema } from '$lib/schemas/SignupSchema';
 import type { Actions } from './$types.js';
 import { fail, redirect } from '@sveltejs/kit';
-import { supabase } from '$lib/supabaseClient.js';
 
 export async function load({ params }) {
 	return {
@@ -13,6 +12,9 @@ export async function load({ params }) {
 
 export const actions: Actions = {
 	default: async (event) => {
+		const {
+			locals: { supabase }
+		} = event;
 		const form = await superValidate(event, zod(AuthSchema));
 		if (!form.valid) {
 			console.log(form.errors);
@@ -22,7 +24,7 @@ export const actions: Actions = {
 		}
 		const { email, password } = form.data;
 
-		const { data, error } = await supabase.auth.signUp({
+		const { error } = await supabase.auth.signUp({
 			email,
 			password
 		});
@@ -39,7 +41,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+		const { error: loginError } = await supabase.auth.signInWithPassword({
 			email,
 			password
 		});
