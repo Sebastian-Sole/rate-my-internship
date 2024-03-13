@@ -4,10 +4,11 @@
 	import LoginForm from '$lib/components/login-form.svelte';
 	import { redirect } from '@sveltejs/kit';
 
+	const { form } = data;
+
 	if (data.form.valid) {
-		console.log('hello');
 		redirect(300, '/');
 	}
 </script>
 
-<LoginForm data={data.form} />
+<LoginForm formSchema={form} />

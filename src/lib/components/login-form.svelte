@@ -5,9 +5,9 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { type AuthForm, AuthSchema } from '$lib/schemas/SignupSchema';
 
-	export let data: SuperValidated<Infer<AuthForm>>;
+	export let formSchema: SuperValidated<Infer<AuthForm>>;
 
-	const form = superForm(data, {
+	const form = superForm(formSchema, {
 		validators: zodClient(AuthSchema)
 	});
 

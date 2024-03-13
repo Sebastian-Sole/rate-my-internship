@@ -1,6 +1,5 @@
 import { AuthSchema } from '$lib/schemas/SignupSchema';
-import { supabase } from '$lib/supabaseClient';
-import { redirect, type Actions } from '@sveltejs/kit';
+import { redirect, type Actions, fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
@@ -12,6 +11,9 @@ export async function load({ params }) {
 
 export const actions: Actions = {
 	default: async (event) => {
+		const {
+			locals: { supabase }
+		} = event;
 		const form = await superValidate(event, zod(AuthSchema));
 		if (!form.valid) {
 			console.log(form.errors);
@@ -24,32 +26,16 @@ export const actions: Actions = {
 		}
 		const { email, password } = form.data;
 
-		console.log(form.data);
+		const { error } = await supabase.auth.signInWithPassword({
+			email: email,
+			password: password
+		});
 
-		const x = await supabase.auth
-			.signInWithPassword({
-				email: email,
-				password: password
-			})
-			.then((res) => {
-				throw redirect(301, '/');
-			})
-			.catch((error) => {
-				console.log(error);
-				return {
-					status: 400,
-					body: {
-						form: {
-							errors: {
-								email: error.message
-							}
-						},
-						success: 'false'
-					}
-				};
-			});
-		// Redirect if successfull login with logged in session
-		console.log(x.body.form.errors);
-		throw redirect(301, '/');
+		if (error) {
+			console.log(error);
+			return fail(500, { message: 'An error occurred while logging in. Please try again later.' });
+		}
+
+		return redirect(303, '/');
 	}
 };

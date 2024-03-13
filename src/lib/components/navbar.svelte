@@ -5,22 +5,26 @@
 	let language = '$locale';
 
 	import { t, locales, locale } from '$lib/translations';
-	import type { Session } from '@supabase/supabase-js';
+	import type { Session, SupabaseClient } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
 
 	export let session: Session | null;
+	export let supabase: SupabaseClient<any, 'public', any>;
 
 	$: {
 		if (language !== $locale) {
 			$locale = language;
 		}
 	}
+
+	const handleLogout = () => {
+		supabase.auth.signOut();
+	};
 </script>
 
 <div class="mt-5 flex w-full flex-row justify-end">
 	{#if session}
-		<Button class="mr-3" on:click={() => console.log('logout')}>{$t('common.navbar.logout')}</Button
-		>
+		<Button class="mr-3" on:click={() => handleLogout()}>{$t('common.navbar.logout')}</Button>
 	{/if}
 	{#if !session}
 		<Button class="mr-3" on:click={() => goto('/login')}>{$t('common.navbar.login')}</Button>
