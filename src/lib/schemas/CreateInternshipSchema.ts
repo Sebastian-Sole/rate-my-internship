@@ -14,7 +14,8 @@ export const CreateInternshipSchema = z.object({
 	projectDescription: z.string(),
 	rating: z.number(),
 	socialAspects: z.string(),
-	duration: z.string(),
+	start_date: z.string(),
+	end_date: z.string(),
 	teamSize: z.number(),
 	userId: z.number(),
 	technologies: z.array(z.string())

@@ -5,25 +5,22 @@
 	import { cn } from '$lib/utils.js';
 	import CalendarIcon from 'svelte-radix/Calendar.svelte';
 
-	import {
-		CreateInternshipSchema,
-		type CreateInternship
-	} from '$lib/schemas/CreateInternshipSchema';
+	import { CreateInternshipSchema } from '$lib/schemas/CreateInternshipSchema';
 	import SuperDebug, { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	import type { PageData } from './$types';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import {
 		type DateValue,
 		DateFormatter,
 		getLocalTimeZone,
 		parseDate,
-		CalendarDate,
-		today
+		today,
+		CalendarDate
 	} from '@internationalized/date';
+	import { Calendar } from '$lib/components/ui/calendar';
 	export let data: PageData;
-	import { Calendar } from '$lib/components/ui/calendar/index.js';
 
 	const { createInternshipForm } = data;
 
@@ -37,9 +34,10 @@
 		dateStyle: 'long'
 	});
 
-	let value: DateValue | undefined;
-
-	$: value = $formData.duration ? parseDate($formData.duration) : undefined;
+	let start_date_value: DateValue | undefined;
+	let end_date_value: DateValue | undefined;
+	$: start_date_value = $formData.start_date ? parseDate($formData.start_date) : undefined;
+	$: end_date_value = $formData.end_date ? parseDate($formData.end_date) : undefined;
 
 	let placeholder: DateValue = today(getLocalTimeZone());
 </script>
@@ -80,57 +78,95 @@
 			<Form.Description>Must be at least 8 characters long.</Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Field {form} name="duration" class="w-full">
+
+		<Form.Field {form} name="start_date" class="flex flex-col">
 			<Form.Control let:attrs>
-				<Form.Label>Duration of Internship</Form.Label>
-				<Popover.Root openFocus>
-					<Popover.Trigger asChild let:builder>
-						<Button
-							variant="outline"
-							class={cn(
-								'w-[300px] justify-start text-left font-normal',
-								!value && 'text-muted-foreground'
-							)}
-							builders={[builder]}
-						>
-							<CalendarIcon class="mr-2 h-4 w-4" />
-							{#if value && value.start}
-								{#if value.end}
-									{df.format(value.start.toDate(getLocalTimeZone()))} - {df.format(
-										value.end.toDate(getLocalTimeZone())
-									)}
-								{:else}
-									{df.format(value.start.toDate(getLocalTimeZone()))}
-								{/if}
-							{:else if startValue}
-								{df.format(startValue.toDate(getLocalTimeZone()))}
-							{:else}
-								Pick a date
-							{/if}
-						</Button>
+				<Form.Label>Date of birth</Form.Label>
+				<Popover.Root>
+					<Popover.Trigger
+						{...attrs}
+						class={cn(
+							buttonVariants({ variant: 'outline' }),
+							'w-[280px] justify-start pl-4 text-left font-normal',
+							!start_date_value && 'text-muted-foreground'
+						)}
+					>
+						{start_date_value
+							? df.format(start_date_value.toDate(getLocalTimeZone()))
+							: 'Pick a date'}
+						<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 					</Popover.Trigger>
-					<Popover.Content class="w-auto p-0" align="start">
-						<RangeCalendar
-							bind:value
-							bind:startValue
-							placeholder={value?.start}
+					<Popover.Content class="w-auto p-0" side="top">
+						<Calendar
+							value={start_date_value}
+							bind:placeholder
+							minValue={new CalendarDate(1900, 1, 1)}
+							maxValue={today(getLocalTimeZone())}
+							calendarLabel="Date of birth"
 							initialFocus
-							numberOfMonths={2}
+							onValueChange={(v) => {
+								if (v) {
+									if (end_date_value && v > end_date_value) {
+										$formData.end_date = v.toString();
+									}
+									$formData.start_date = v.toString();
+								} else {
+									$formData.start_date = '';
+								}
+							}}
 						/>
 					</Popover.Content>
 				</Popover.Root>
+				<Form.Description>Your date of birth is used to calculator your age</Form.Description>
+				<Form.FieldErrors />
+				<input hidden value={$formData.start_date} name={attrs.name} />
 			</Form.Control>
-			<Form.Description>This is your public display name.</Form.Description>
-			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Field {form} name="end_date" class="w-full">
+
+		<Form.Field {form} name="end_date" class="flex flex-col">
 			<Form.Control let:attrs>
-				<Form.Label>End Date</Form.Label>
-				<Input {...attrs} bind:value={$formData.end_date} />
+				<Form.Label>Date of birth</Form.Label>
+				<Popover.Root>
+					<Popover.Trigger
+						{...attrs}
+						class={cn(
+							buttonVariants({ variant: 'outline' }),
+							'w-[280px] justify-start pl-4 text-left font-normal',
+							!end_date_value && 'text-muted-foreground'
+						)}
+					>
+						{end_date_value
+							? df.format(end_date_value.toDate(getLocalTimeZone()))
+							: 'Pick a date'}
+						<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+					</Popover.Trigger>
+					<Popover.Content class="w-auto p-0" side="top">
+						<Calendar
+							value={end_date_value}
+							bind:placeholder
+							minValue={new CalendarDate(1900, 1, 1)}
+							maxValue={today(getLocalTimeZone())}
+							calendarLabel="Date of birth"
+							initialFocus
+							onValueChange={(v) => {
+								if (v) {
+									if (start_date_value && v < start_date_value) {
+										$formData.start_date = v.toString();
+									} 
+									$formData.end_date = v.toString();
+								} else {
+									$formData.end_date = '';
+								}
+							}}
+						/>
+					</Popover.Content>
+				</Popover.Root>
+				<Form.Description>Your date of birth is used to calculator your age</Form.Description>
+				<Form.FieldErrors />
+				<input hidden value={$formData.end_date} name={attrs.name} />
 			</Form.Control>
-			<Form.Description>This is your public display name.</Form.Description>
-			<Form.FieldErrors />
 		</Form.Field>
+
 		<Form.Field {form} name="teamSize" class="w-full">
 			<Form.Control let:attrs>
 				<Form.Label>Team Size</Form.Label>
