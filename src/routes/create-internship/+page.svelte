@@ -8,6 +8,11 @@
 	import { CreateInternshipSchema } from '$lib/schemas/CreateInternshipSchema';
 	import SuperDebug, { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
+	import CaretSort from "svelte-radix/CaretSort.svelte";
+	import * as Command from "$lib/components/ui/command/index.js";
+	import Check from "svelte-radix/Check.svelte";
+
+
 
 	import type { PageData } from './$types';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -20,9 +25,12 @@
 		CalendarDate
 	} from '@internationalized/date';
 	import { Calendar } from '$lib/components/ui/calendar';
+	import { PrismaClient } from '@prisma/client';
+	import { tick } from 'svelte';
+	import { Field } from 'formsnap';
 	export let data: PageData;
 
-	const { createInternshipForm } = data;
+	const { createInternshipForm, companies } = data;
 
 	const form = superForm(createInternshipForm, {
 		validators: zodClient(CreateInternshipSchema)
@@ -38,26 +46,79 @@
 	let end_date_value: DateValue | undefined;
 	$: start_date_value = $formData.start_date ? parseDate($formData.start_date) : undefined;
 	$: end_date_value = $formData.end_date ? parseDate($formData.end_date) : undefined;
+	$: team_size = $formData.teamSize ? Number($formData.teamSize) : undefined;
 
 	let placeholder: DateValue = today(getLocalTimeZone());
+
+	let open = false;
+
+	function closeAndFocusTrigger(triggerId: string) {
+		open = false;
+		tick().then(() => {
+			const trigger = document.getElementById(triggerId);
+			trigger?.focus();
+		})
+	}
+
 </script>
 
 <SuperDebug data={formData} />
 
 <form method="POST" use:enhance class="flex w-full justify-center">
 	<div class="flex w-[80%] flex-col items-center">
-		<Form.Field {form} name="companyId" class="w-full">
-			<Form.Control let:attrs>
-				<Form.Label>Company</Form.Label>
-				<Input
-					{...attrs}
-					bind:value={$formData.companyId}
-					placeholder="TODO: Change this to dropdown search"
-				/>
-			</Form.Control>
-			<Form.Description>This is your public display name.</Form.Description>
-			<Form.FieldErrors />
+		<Form.Field {form} name="companyId" class="flex flex-col w-full">
+				<Popover.Root bind:open let:ids>
+					<Form.Control let:attrs>
+						<Form.Label>Company</Form.Label>
+					  <Popover.Trigger
+						class={cn(
+						  buttonVariants({ variant: "outline" }),
+						  "w-[200px] justify-between",
+						  !$formData.companyId && "text-muted-foreground"
+						)}
+						role="combobox"
+						{...attrs}
+					  >
+						{companies.find((c) => c.id === $formData.companyId)?.name ??
+						  "Select a company..."}
+						<CaretSort class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					  </Popover.Trigger>
+					  <input hidden value={$formData.companyId} name={attrs.name} />
+					</Form.Control>
+					<Popover.Content class="w-[200px] p-0">
+					  <Command.Root>
+						<Command.Input
+						  autofocus
+						  placeholder="Search company..."
+						  class="h-9"
+						/>
+						<Command.Empty>No company found.</Command.Empty>
+						<Command.Group>
+						  {#each companies as company}
+							<Command.Item
+							  value={company.name}
+							  onSelect={() => {
+								$formData.companyId = company.id;
+								closeAndFocusTrigger(ids.trigger);
+							  }}
+							>
+							  {company.name}
+							  <Check
+								class={cn(
+								  "ml-auto h-4 w-4",
+								  company.id !== $formData.companyId && "text-transparent"
+								)}
+							  />
+							</Command.Item>
+						  {/each}
+						</Command.Group>
+					  </Command.Root>
+					</Popover.Content>
+				  </Popover.Root>
+
+
 		</Form.Field>
+
 		<Form.Field {form} name="name" class="w-full">
 			<Form.Control let:attrs>
 				<Form.Label>Internship Title</Form.Label>
@@ -170,7 +231,7 @@
 		<Form.Field {form} name="teamSize" class="w-full">
 			<Form.Control let:attrs>
 				<Form.Label>Team Size</Form.Label>
-				<Input {...attrs} bind:value={$formData.teamSize} placeholder={'5'} />
+				<Input {...attrs} bind:value={$formData.teamSize} placeholder={"5"} />
 			</Form.Control>
 			<Form.Description>This is your public display name.</Form.Description>
 			<Form.FieldErrors />
@@ -178,9 +239,9 @@
 		<Form.Field {form} name="hourlyWage" class="w-full">
 			<Form.Control let:attrs>
 				<Form.Label>Hourly Wage</Form.Label>
-				<Input {...attrs} bind:value={$formData.hourlyWage} placeholder={'275kr'} />
+				<Input {...attrs} bind:value={$formData.hourlyWage} placeholder={'275'} />
 			</Form.Control>
-			<Form.Description>This is your public display name.</Form.Description>
+			<Form.Description></Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 		<Form.Field {form} name="learnings" class="w-full">
